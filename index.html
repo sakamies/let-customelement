@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Let custom element</title>
+</head>
+<body>
+  <h1>Let custom element</h1>
+
+  <p>Maybe I'm just profoundly naive, but also what if forms were the reactive primitives we wanted all along?</p>
+
+  <p>Forms are already a declarative method to have reactive values in html. We have events to react to changes. You can have hidden values that can be used for processing without showing up to users. You can set inputs disabled to not have their values show up in formdata and thus not be sent with form submits. You can combine all these things willy nilly and they work great together.</p>
+
+  <p>The only thing I'm proposing here is a shortcut to make hidden disabled inputs easier. So basically a declarative element to make signal, that seems to be all the rage nowadays.</p>
+
+  <p>Use the &lt;let-&gt; element to associate a named value on a form.</p>
+
+  <form>
+    <input type="hidden" disabled name="native" value="Native version">
+    <let- name="custom" value="Let is just a tiny bit terser"></let->
+  </form>
+  <form id="otherform"></form>
+
+  <script type="module">
+    import { Let } from './let.js'
+    customElements.define('let-', Let);
+
+    // Use some convenience to access form elements.
+    // Something like Memelib (https://github.com/sakamies/memelib) would make this much easier.
+    const form = document.forms[0]
+    const els = form.elements
+    els.custom.value = 'This is fun'
+
+    form.addEventListener('change', () => {
+      Array.from(els).forEach(el => console.log(el.name, el.value))
+    })
+
+    els.custom.value = 'Something else'
+    form.dispatchEvent(new Event('change'));
+  </script>
+</body>
+</html>
