@@ -1,7 +1,15 @@
 export class Let extends HTMLElement {
-  static formAssociated = true;
-  static observedAttributes = ['name', 'value', 'form']
+  static formAssociated = true
+  static observedAttributes = ['name', 'value', 'signal']
+  static signal = null
   #internals
+  #signal
+
+  get signal() {return this.#signal}
+  set signal(name) {
+    this.#signal = name
+    this.setAttribute('signal', name)
+  }
 
   get name() {return this.#internals.name}
   set name(name) {
@@ -9,10 +17,15 @@ export class Let extends HTMLElement {
     this.setAttribute('name', name)
   }
 
-  get value() {return this.#internals.value}
+  #value
+  get value() {return this.#value}
   set value(value) {
     this.#internals.value = value
-    this.setAttribute('value', value)
+    this.#value = value
+    if (this.#signal !== null) {
+      const event = new Event(this.#signal || this.localName, {bubbles: true})
+      this.dispatchEvent(event)
+    }
   }
 
   get form() {return this.#internals.form}
@@ -21,17 +34,16 @@ export class Let extends HTMLElement {
 
   constructor() {
     super();
-    this.#internals = this.attachInternals();
+    this.#internals = this.attachInternals()
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'signal' && oldValue !== newValue) this.signal = newValue
     if (name === 'name' && oldValue !== newValue) this.name = newValue
     if (name === 'value'  && oldValue !== newValue) this.value = newValue
   }
 
   connectedCallback() {
-    this.disabled = true
-    this.hidden = true
     this.#internals.role = 'none'
   }
   disconnectedCallback() {}
